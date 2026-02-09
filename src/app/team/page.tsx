@@ -19,6 +19,9 @@ export const metadata: Metadata = {
         "Meet the 3S-SOFT team: a global collective of expert MERN stack developers, eCommerce strategists, and digital marketing professionals committed to your success.",
 };
 
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
+
 type SocialPlatform = "linkedin" | "twitter" | "github" | "dribbble" | "facebook";
 
 const socialIcons: Record<SocialPlatform, IconType> = {

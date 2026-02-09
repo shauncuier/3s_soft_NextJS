@@ -10,6 +10,9 @@ export const metadata = {
         "Boost your business with 3S-SOFT's high-quality services: MERN stack web development, Amazon/eBay/Walmart product listing, SEO audits, and B2B lead generation.",
 };
 
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
+
 const iconMap: Record<string, any> = {
     FaCode,
     FaWordpress,

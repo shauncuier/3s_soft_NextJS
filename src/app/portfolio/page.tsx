@@ -8,6 +8,9 @@ export const metadata = {
     description: "Explore our portfolio of successful digital solutions delivered to clients across the US, UK and beyond.",
 };
 
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
+
 export default async function Portfolio() {
     const portfolio = await getPortfolio();
 

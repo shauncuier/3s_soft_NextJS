@@ -14,6 +14,9 @@ export const metadata = {
     },
 };
 
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
+
 export default async function Blogs() {
     const blogs = await getBlogs(true);
 
