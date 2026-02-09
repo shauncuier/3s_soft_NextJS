@@ -111,9 +111,16 @@ export default async function Team() {
 
                                     <p
                                         itemProp="description"
-                                        className="text-gray-300 text-sm leading-relaxed mb-4"
+                                        className="text-gray-300 text-sm leading-relaxed mb-4 line-clamp-3"
                                     >
-                                        {member.bio}
+                                        {member.bio
+                                            .replace(/<[^>]*>/g, '')
+                                            .replace(/&nbsp;/g, ' ')
+                                            .replace(/&amp;/g, '&')
+                                            .replace(/&lt;/g, '<')
+                                            .replace(/&gt;/g, '>')
+                                            .replace(/&quot;/g, '"')
+                                            .substring(0, 150)}
                                     </p>
 
                                     {/* Skills */}

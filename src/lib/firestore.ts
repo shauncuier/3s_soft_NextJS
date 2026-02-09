@@ -126,7 +126,9 @@ export async function deletePortfolioItem(id: string): Promise<void> {
 export async function getTeamMembers(): Promise<TeamMember[]> {
     const teamRef = collection(db, COLLECTIONS.team);
     const snapshot = await getDocs(teamRef);
-    return snapshot.docs.map((doc) => docToData<TeamMember>(doc));
+    const members = snapshot.docs.map((doc) => docToData<TeamMember>(doc));
+    // Sort by order field, members without order go to end
+    return members.sort((a, b) => (a.order ?? 999) - (b.order ?? 999));
 }
 
 export async function createTeamMember(member: Omit<TeamMember, "id">): Promise<string> {

@@ -126,11 +126,12 @@ export default async function ServiceDetails({ params }: PageParams) {
                     {/* Main Description */}
                     <div className="lg:col-span-2">
                         <h2 className="text-2xl font-bold text-white mb-6 font-semibold">Service Overview</h2>
-                        <div className="prose prose-invert prose-lg max-w-none">
-                            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-                                {service.fullDescription}
-                            </p>
-                        </div>
+                        <div
+                            className="prose prose-invert prose-lg max-w-none text-gray-300 leading-relaxed
+                                prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400
+                                prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal"
+                            dangerouslySetInnerHTML={{ __html: service.fullDescription }}
+                        />
 
                         <div className="mt-12">
                             <h2 className="text-2xl font-bold text-white mb-6 font-semibold">

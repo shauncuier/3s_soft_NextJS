@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getTeamMembers, deleteTeamMember } from "@/lib/firestore";
+import { getTeamMembers, deleteTeamMember, updateTeamMember } from "@/lib/firestore";
 import { TeamMember } from "@/types/firestore";
 import Link from "next/link";
-import { FiEdit, FiTrash2, FiPlus } from "react-icons/fi";
+import { FiEdit, FiTrash2, FiPlus, FiArrowUp, FiArrowDown } from "react-icons/fi";
 import toast from "react-hot-toast";
 
 export default function AdminTeam() {
     const [team, setTeam] = useState<TeamMember[]>([]);
     const [loading, setLoading] = useState(true);
+    const [reordering, setReordering] = useState(false);
 
     useEffect(() => {
         fetchTeam();
@@ -40,6 +41,42 @@ export default function AdminTeam() {
         }
     }
 
+    async function handleReorder(index: number, direction: "up" | "down") {
+        if (reordering) return;
+
+        const newIndex = direction === "up" ? index - 1 : index + 1;
+        if (newIndex < 0 || newIndex >= team.length) return;
+
+        setReordering(true);
+        const newTeam = [...team];
+        const temp = newTeam[index];
+        newTeam[index] = newTeam[newIndex];
+        newTeam[newIndex] = temp;
+
+        // Update order values
+        const updatedTeam = newTeam.map((member, idx) => ({
+            ...member,
+            order: idx,
+        }));
+
+        setTeam(updatedTeam);
+
+        try {
+            // Save new order to database
+            await Promise.all([
+                updateTeamMember(updatedTeam[index].id!, { order: index }),
+                updateTeamMember(updatedTeam[newIndex].id!, { order: newIndex }),
+            ]);
+            toast.success("Order updated");
+        } catch (error) {
+            console.error("Error updating order:", error);
+            toast.error("Failed to update order");
+            fetchTeam(); // Revert on error
+        } finally {
+            setReordering(false);
+        }
+    }
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
@@ -51,7 +88,10 @@ export default function AdminTeam() {
     return (
         <div>
             <div className="flex justify-between items-center mb-8">
-                <h1 className="text-3xl font-bold text-white">Team Members</h1>
+                <div>
+                    <h1 className="text-3xl font-bold text-white">Team Members</h1>
+                    <p className="text-gray-400 text-sm mt-1">Use arrows to reorder members</p>
+                </div>
                 <Link
                     href="/admin/team/new"
                     className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
@@ -73,11 +113,42 @@ export default function AdminTeam() {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {team.map((member) => (
+                    {team.map((member, index) => (
                         <div
                             key={member.id}
-                            className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors"
+                            className="bg-gray-800 rounded-xl border border-gray-700 overflow-hidden hover:border-gray-600 transition-colors relative"
                         >
+                            {/* Order Badge */}
+                            <div className="absolute top-2 left-2 z-10 bg-blue-500 text-white text-xs font-bold w-6 h-6 rounded-full flex items-center justify-center">
+                                {index + 1}
+                            </div>
+
+                            {/* Reorder Buttons */}
+                            <div className="absolute top-2 right-2 z-10 flex flex-col gap-1">
+                                <button
+                                    onClick={() => handleReorder(index, "up")}
+                                    disabled={index === 0 || reordering}
+                                    className={`p-1.5 rounded transition-colors ${index === 0 || reordering
+                                            ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                                            : "bg-gray-700 text-white hover:bg-blue-500"
+                                        }`}
+                                    title="Move up"
+                                >
+                                    <FiArrowUp className="w-4 h-4" />
+                                </button>
+                                <button
+                                    onClick={() => handleReorder(index, "down")}
+                                    disabled={index === team.length - 1 || reordering}
+                                    className={`p-1.5 rounded transition-colors ${index === team.length - 1 || reordering
+                                            ? "bg-gray-700 text-gray-500 cursor-not-allowed"
+                                            : "bg-gray-700 text-white hover:bg-blue-500"
+                                        }`}
+                                    title="Move down"
+                                >
+                                    <FiArrowDown className="w-4 h-4" />
+                                </button>
+                            </div>
+
                             <div className="h-48 bg-gray-700 relative overflow-hidden group">
                                 {member.image ? (
                                     <img

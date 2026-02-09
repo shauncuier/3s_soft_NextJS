@@ -125,9 +125,12 @@ export default async function PortfolioDetails({ params }: PageParams) {
                     <div className="lg:col-span-2 space-y-10">
                         <div>
                             <h2 className="text-3xl font-bold text-white mb-6 font-semibold">Project Overview</h2>
-                            <p className="text-xl text-gray-300 leading-relaxed">
-                                {project.longDescription || project.description}
-                            </p>
+                            <div
+                                className="text-xl text-gray-300 leading-relaxed prose prose-invert prose-lg max-w-none
+                                    prose-headings:text-white prose-p:text-gray-300 prose-a:text-blue-400
+                                    prose-strong:text-white prose-ul:list-disc prose-ol:list-decimal"
+                                dangerouslySetInnerHTML={{ __html: project.longDescription || project.description }}
+                            />
                         </div>
 
                         {project.scope && project.scope.length > 0 && (

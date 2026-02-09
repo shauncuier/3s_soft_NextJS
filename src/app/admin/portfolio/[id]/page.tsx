@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { getPortfolio, updatePortfolioItem } from "@/lib/firestore";
 import { PortfolioItem } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave, FiStar } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiStar, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface EditPortfolioPageProps {
     params: Promise<{ id: string }>;
@@ -17,6 +19,8 @@ export default function EditPortfolio({ params }: EditPortfolioPageProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         title: "",
         slug: "",
@@ -53,6 +57,10 @@ export default function EditPortfolio({ params }: EditPortfolioPageProps) {
                         results: item.results,
                         scope: item.scope.join(", "),
                     });
+                    // Detect if image URL is external or uploaded
+                    if (item.image && !item.image.includes("firebasestorage")) {
+                        setImageInputMode("url");
+                    }
                 } else {
                     toast.error("Portfolio item not found");
                     router.push("/admin/portfolio");
@@ -183,68 +191,124 @@ export default function EditPortfolio({ params }: EditPortfolioPageProps) {
                         />
                     </div>
 
+                    {/* Rich Text Editor for Long Description */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Full Description</label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.longDescription}
-                            onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                            rows={6}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            onChange={(value) => setFormData({ ...formData, longDescription: value })}
+                            placeholder="Detailed project description with rich formatting..."
+                            minHeight="300px"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Image URL</label>
+                    {/* Project Image Section */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Project Image
+                        </label>
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="portfolio"
+                                currentImageUrl={formData.image}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, image: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, image: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="landscape"
+                                seoName={formData.title}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
                                 <input
                                     type="url"
                                     value={formData.image}
                                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://example.com/project-image.jpg"
                                 />
-                            </div>
-                        </div>
 
-                        {/* Preview */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-900/50 rounded-lg border border-gray-700">
-                            <p className="text-xs text-gray-500 mb-2 uppercase font-bold tracking-wider text-center">Preview</p>
-                            <div className="w-full h-32 rounded-lg overflow-hidden border border-gray-600 bg-gray-800">
-                                {formData.image ? (
-                                    <img
-                                        src={formData.image}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = "https://placehold.co/600x400/1f2937/9ca3af?text=Broken+Image+Link";
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
-                                        No Image Provided
+                                {formData.image && (
+                                    <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                        <img
+                                            src={formData.image}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://placehold.co/800x450/1f2937/9ca3af?text=Invalid+Image+URL";
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Live Project URL</label>
-                            <input
-                                type="url"
-                                value={formData.link}
-                                onChange={(e) => setFormData({ ...formData, link: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            />
-                        </div>
+                        )}
                     </div>
 
                     <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Technologies</label>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Live Project URL</label>
+                        <input
+                            type="url"
+                            value={formData.link}
+                            onChange={(e) => setFormData({ ...formData, link: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="https://example.com"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Technologies (comma-separated)</label>
                         <input
                             type="text"
                             value={formData.technologies}
                             onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="React, Next.js, Node.js"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Scope (comma-separated)</label>
+                        <input
+                            type="text"
+                            value={formData.scope}
+                            onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="Frontend, Backend, Design"
                         />
                     </div>
 
@@ -255,6 +319,7 @@ export default function EditPortfolio({ params }: EditPortfolioPageProps) {
                             onChange={(e) => setFormData({ ...formData, results: e.target.value })}
                             rows={2}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="Key outcomes and results achieved..."
                         />
                     </div>
 
@@ -268,6 +333,9 @@ export default function EditPortfolio({ params }: EditPortfolioPageProps) {
                             <FiStar className="w-4 h-4" />
                             {formData.featured ? "Featured" : "Not Featured"}
                         </button>
+                        <span className="text-sm text-gray-500">
+                            {formData.featured ? "This project will be highlighted" : "Mark as featured to highlight"}
+                        </span>
                     </div>
                 </div>
 

@@ -5,18 +5,23 @@ import { useRouter } from "next/navigation";
 import { db } from "@/firebase/firebase.config";
 import { collection, addDoc } from "firebase/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave, FiPlus, FiTrash2 } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiPlus, FiTrash2, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function NewService() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         title: "",
         slug: "",
         shortDescription: "",
         fullDescription: "",
         icon: "",
+        image: "",
         gradient: "from-blue-500 to-purple-600",
         seoTitle: "",
         seoDescription: "",
@@ -163,16 +168,92 @@ export default function NewService() {
                         />
                     </div>
 
+                    {/* Full Description - Rich Text Editor */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Full Description *</label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.fullDescription}
-                            onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
-                            required
-                            rows={6}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Detailed service explanation..."
+                            onChange={(value) => setFormData({ ...formData, fullDescription: value })}
+                            placeholder="Detailed service explanation with rich formatting..."
+                            minHeight="300px"
                         />
+                    </div>
+
+                    {/* Service Image Section */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Service Image
+                        </label>
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="services"
+                                currentImageUrl={formData.image}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, image: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, image: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="landscape"
+                                seoName={formData.title}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
+                                <input
+                                    type="url"
+                                    value={formData.image}
+                                    onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://example.com/service-image.jpg"
+                                />
+
+                                {formData.image && (
+                                    <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                        <img
+                                            src={formData.image}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://placehold.co/800x450/1f2937/9ca3af?text=Invalid+Image+URL";
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 

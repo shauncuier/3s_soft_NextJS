@@ -41,6 +41,7 @@ export interface TeamMember {
     bio: string;
     image: string;
     skills: string[];
+    order?: number; // For managing display sequence
     social: {
         linkedin?: string;
         twitter?: string;

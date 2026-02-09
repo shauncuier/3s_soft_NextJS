@@ -47,9 +47,11 @@ const TestimonialSlider = ({ testimonials }: TestimonialSliderProps) => {
                             <FaStar key={i} className="text-yellow-400" />
                         ))}
                     </div>
-                    <p className="text-xl italic my-6 font-light text-white text-center">
-                        &quot;{testimonial.testimonial}&quot;
-                    </p>
+                    <div
+                        className="text-xl italic my-6 font-light text-white text-center prose prose-invert prose-lg max-w-none
+                            prose-p:text-white prose-p:italic prose-a:text-blue-400"
+                        dangerouslySetInnerHTML={{ __html: `&quot;${testimonial.testimonial}&quot;` }}
+                    />
                     <div className="flex items-center justify-center gap-4">
                         <div className="w-15 h-15 rounded-full ring-3 ring-blue-900 overflow-hidden relative">
                             <Image

@@ -55,17 +55,7 @@ export async function generateMetadata({ params }: PageParams): Promise<Metadata
     };
 }
 
-// Helper to render formatted text
-const renderFormattedText = (text: string): React.ReactNode[] => {
-    if (!text) return [];
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
-    return parts.map((part, i) => {
-        if (part.startsWith("**") && part.endsWith("**")) {
-            return <strong key={i} className="text-white font-semibold">{part.slice(2, -2)}</strong>;
-        }
-        return part;
-    });
-};
+// Blog content is rendered as HTML using dangerouslySetInnerHTML
 
 export default async function BlogDetails({ params }: PageParams) {
     const { slug } = await params;
@@ -154,35 +144,23 @@ export default async function BlogDetails({ params }: PageParams) {
                     </div>
                 </div>
 
-                {/* Blog Body */}
-                <article className="prose prose-lg prose-invert max-w-none text-gray-300 leading-relaxed">
-                    {(blog.content || "").split("\n").map((paragraph, index) => {
-                        if (!paragraph.trim()) return null;
-
-                        const listMatch = paragraph.match(/^(\d+)\.\s+(.+)/);
-                        if (listMatch) {
-                            return (
-                                <div key={index} className="flex gap-3 mb-4">
-                                    <span className="bg-blue-500/20 text-blue-400 font-bold w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-sm">
-                                        {listMatch[1]}
-                                    </span>
-                                    <p className="flex-1">{renderFormattedText(listMatch[2])}</p>
-                                </div>
-                            );
-                        }
-
-                        if (paragraph.trim().startsWith("- ")) {
-                            return (
-                                <div key={index} className="flex gap-3 mb-3 ml-4">
-                                    <span className="text-blue-400 mt-1">•</span>
-                                    <p className="flex-1">{renderFormattedText(paragraph.slice(2))}</p>
-                                </div>
-                            );
-                        }
-
-                        return <p key={index} className="mb-4">{renderFormattedText(paragraph)}</p>;
-                    })}
-                </article>
+                {/* Blog Body - Renders HTML content from rich text editor */}
+                <article
+                    className="prose prose-lg prose-invert max-w-none text-gray-300 leading-relaxed
+                        prose-headings:text-white prose-headings:font-bold
+                        prose-h1:text-3xl prose-h2:text-2xl prose-h3:text-xl
+                        prose-p:text-gray-300 prose-p:mb-4
+                        prose-a:text-blue-400 prose-a:hover:text-blue-300
+                        prose-strong:text-white prose-strong:font-semibold
+                        prose-ul:list-disc prose-ul:pl-6
+                        prose-ol:list-decimal prose-ol:pl-6
+                        prose-li:text-gray-300 prose-li:mb-2
+                        prose-blockquote:border-l-4 prose-blockquote:border-blue-500 prose-blockquote:pl-4 prose-blockquote:italic
+                        prose-code:bg-gray-800 prose-code:px-2 prose-code:py-1 prose-code:rounded
+                        prose-pre:bg-gray-800 prose-pre:p-4 prose-pre:rounded-lg
+                        prose-img:rounded-lg prose-img:mx-auto"
+                    dangerouslySetInnerHTML={{ __html: blog.content || "" }}
+                />
 
                 {/* Tags Section */}
                 {blog.tags && blog.tags.length > 0 && (

@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { createBlog } from "@/lib/firestore";
 import { Blog } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiEye, FiEyeOff, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function NewBlog() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         title: "",
         slug: "",
@@ -39,6 +43,23 @@ export default function NewBlog() {
         });
     };
 
+    // Calculate read time based on content length
+    const calculateReadTime = (content: string) => {
+        const wordsPerMinute = 200;
+        const textContent = content.replace(/<[^>]*>/g, ""); // Strip HTML tags
+        const wordCount = textContent.split(/\s+/).filter(Boolean).length;
+        const minutes = Math.ceil(wordCount / wordsPerMinute);
+        return minutes <= 1 ? "1 min read" : `${minutes} min read`;
+    };
+
+    const handleContentChange = (content: string) => {
+        setFormData({
+            ...formData,
+            content,
+            readTime: calculateReadTime(content),
+        });
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setLoading(true);
@@ -52,7 +73,7 @@ export default function NewBlog() {
                 imageUrl: formData.imageUrl,
                 author: formData.author,
                 tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
-                readTime: formData.readTime,
+                readTime: formData.readTime || calculateReadTime(formData.content),
                 published: formData.published,
                 createdAt: new Date(),
                 publishedAt: formData.published ? new Date() : new Date(),
@@ -130,33 +151,98 @@ export default function NewBlog() {
                         />
                     </div>
 
-                    {/* Content */}
+                    {/* Rich Text Editor for Content */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                             Content *
                         </label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            required
-                            rows={12}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 font-mono text-sm"
-                            placeholder="Write your blog content here... (supports Markdown)"
+                            onChange={handleContentChange}
+                            placeholder="Write your blog content here..."
+                            minHeight="400px"
                         />
+                        <p className="text-xs text-gray-500 mt-2">
+                            {formData.readTime || "0 min read"} • Use the toolbar to format text, add images, links, and more.
+                        </p>
                     </div>
 
-                    {/* Image URL */}
+                    {/* Featured Image Section */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Featured Image URL
+                            Featured Image *
                         </label>
-                        <input
-                            type="url"
-                            value={formData.imageUrl}
-                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="https://example.com/image.jpg"
-                        />
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                    ? "bg-blue-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="blogs"
+                                currentImageUrl={formData.imageUrl}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, imageUrl: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, imageUrl: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="landscape"
+                                seoName={formData.title}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
+                                <input
+                                    type="url"
+                                    value={formData.imageUrl}
+                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+
+                                {/* Image Preview for URL */}
+                                {formData.imageUrl && (
+                                    <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                        <img
+                                            src={formData.imageUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://placehold.co/800x450/1f2937/9ca3af?text=Invalid+Image+URL";
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -199,8 +285,11 @@ export default function NewBlog() {
                                 value={formData.readTime}
                                 onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                placeholder="5 min read"
+                                placeholder="Auto-calculated"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Auto-calculated based on content
+                            </p>
                         </div>
                     </div>
 
@@ -210,8 +299,8 @@ export default function NewBlog() {
                             type="button"
                             onClick={() => setFormData({ ...formData, published: !formData.published })}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${formData.published
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-700 text-gray-300"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-700 text-gray-300"
                                 }`}
                         >
                             {formData.published ? (

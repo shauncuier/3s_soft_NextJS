@@ -5,12 +5,16 @@ import { useRouter } from "next/navigation";
 import { createPortfolioItem } from "@/lib/firestore";
 import { PortfolioItem } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave, FiStar } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiStar, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function NewPortfolio() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         title: "",
         slug: "",
@@ -99,27 +103,10 @@ export default function NewPortfolio() {
                                 onChange={handleTitleChange}
                                 required
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                placeholder="Project name"
+                                placeholder="Enter project title"
                             />
                         </div>
 
-                        {/* Client */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Client *
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.client}
-                                onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                                required
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                placeholder="Client name"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* Slug */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
@@ -130,6 +117,7 @@ export default function NewPortfolio() {
                                 value={formData.slug}
                                 onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="project-url-slug"
                             />
                         </div>
 
@@ -144,13 +132,28 @@ export default function NewPortfolio() {
                                 required
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                             >
-                                <option value="">Select category</option>
+                                <option value="">Select Category</option>
                                 <option value="Web Development">Web Development</option>
-                                <option value="eCommerce">eCommerce</option>
-                                <option value="UI/UX Design">UI/UX Design</option>
                                 <option value="Mobile App">Mobile App</option>
+                                <option value="E-Commerce">E-Commerce</option>
+                                <option value="UI/UX Design">UI/UX Design</option>
+                                <option value="Digital Marketing">Digital Marketing</option>
                                 <option value="SEO">SEO</option>
                             </select>
+                        </div>
+
+                        {/* Client */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Client Name
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.client}
+                                onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="Client company/name"
+                            />
                         </div>
                     </div>
 
@@ -165,66 +168,120 @@ export default function NewPortfolio() {
                             required
                             rows={2}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Brief overview for portfolio listing..."
+                            placeholder="Brief project description for listings..."
                         />
                     </div>
 
-                    {/* Long Description */}
+                    {/* Long Description - Rich Text Editor */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                             Full Description
                         </label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.longDescription}
-                            onChange={(e) => setFormData({ ...formData, longDescription: e.target.value })}
-                            rows={6}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Detailed project description..."
+                            onChange={(value) => setFormData({ ...formData, longDescription: value })}
+                            placeholder="Detailed project description with rich formatting..."
+                            minHeight="300px"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        {/* Image URL */}
-                        <div className="flex flex-col space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">
-                                    Image URL
-                                </label>
+                    {/* Project Image Section */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Project Image *
+                        </label>
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                    ? "bg-purple-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                    ? "bg-purple-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="portfolio"
+                                currentImageUrl={formData.image}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, image: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, image: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="landscape"
+                                seoName={formData.title}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
                                 <input
                                     type="url"
                                     value={formData.image}
                                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                    placeholder="https://example.com/image.jpg"
+                                    placeholder="https://example.com/project-image.jpg"
                                 />
-                            </div>
-                        </div>
 
-                        {/* Preview */}
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-900/50 rounded-lg border border-gray-700">
-                            <p className="text-xs text-gray-500 mb-2 uppercase font-bold tracking-wider text-center">Preview</p>
-                            <div className="w-full h-32 rounded-lg overflow-hidden border border-gray-600 bg-gray-800">
-                                {formData.image ? (
-                                    <img
-                                        src={formData.image}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = "https://placehold.co/600x400/1f2937/9ca3af?text=Broken+Image+Link";
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-600 text-sm">
-                                        No Image Provided
+                                {formData.image && (
+                                    <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                        <img
+                                            src={formData.image}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://placehold.co/800x450/1f2937/9ca3af?text=Invalid+Image+URL";
+                                            }}
+                                        />
                                     </div>
                                 )}
                             </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Technologies */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Technologies Used
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.technologies}
+                                onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="React, Node.js, MongoDB"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Separate with commas</p>
                         </div>
 
                         {/* Project Link */}
-                        <div className="md:col-span-2">
+                        <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">
-                                Live Project URL
+                                Project Link
                             </label>
                             <input
                                 type="url"
@@ -234,48 +291,35 @@ export default function NewPortfolio() {
                                 placeholder="https://project-url.com"
                             />
                         </div>
-                    </div>
 
-                    {/* Technologies */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Technologies Used
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.technologies}
-                            onChange={(e) => setFormData({ ...formData, technologies: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="React, Node.js, MongoDB, etc."
-                        />
-                    </div>
+                        {/* Scope */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Project Scope
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.scope}
+                                onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="Design, Development, Deployment"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">Separate with commas</p>
+                        </div>
 
-                    {/* Scope */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Project Scope
-                        </label>
-                        <input
-                            type="text"
-                            value={formData.scope}
-                            onChange={(e) => setFormData({ ...formData, scope: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Frontend Development, Backend API, Database Design, etc."
-                        />
-                    </div>
-
-                    {/* Results */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Results / Impact
-                        </label>
-                        <textarea
-                            value={formData.results}
-                            onChange={(e) => setFormData({ ...formData, results: e.target.value })}
-                            rows={2}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="e.g., 50% increase in conversions, 3x faster load times..."
-                        />
+                        {/* Results */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">
+                                Project Results
+                            </label>
+                            <input
+                                type="text"
+                                value={formData.results}
+                                onChange={(e) => setFormData({ ...formData, results: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="50% increase in conversions"
+                            />
+                        </div>
                     </div>
 
                     {/* Featured Toggle */}

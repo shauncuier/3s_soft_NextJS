@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { getTeamMembers, updateTeamMember } from "@/lib/firestore";
 import { TeamMember } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface EditTeamMemberPageProps {
     params: Promise<{ id: string }>;
@@ -17,6 +19,8 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         name: "",
         position: "",
@@ -49,6 +53,10 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                         facebook: member.social.facebook || "",
                         dribbble: member.social.dribbble || "",
                     });
+                    // Detect if image URL is external or uploaded
+                    if (member.image && !member.image.includes("firebasestorage")) {
+                        setImageInputMode("url");
+                    }
                 } else {
                     toast.error("Team member not found");
                     router.push("/admin/team");
@@ -140,56 +148,105 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                         </div>
                     </div>
 
+                    {/* Rich Text Editor for Bio */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.bio}
-                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                            rows={3}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            onChange={(value) => setFormData({ ...formData, bio: value })}
+                            placeholder="Team member bio and background..."
+                            minHeight="200px"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Profile Image URL</label>
+                    {/* Profile Image Section */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Profile Image
+                        </label>
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="team"
+                                currentImageUrl={formData.image}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, image: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, image: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="square"
+                                seoName={formData.name}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
                                 <input
                                     type="url"
                                     value={formData.image}
                                     onChange={(e) => setFormData({ ...formData, image: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://example.com/profile-photo.jpg"
                                 />
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-900/50 rounded-lg border border-gray-700">
-                            <p className="text-xs text-gray-500 mb-2 uppercase font-bold tracking-wider text-center">Preview</p>
-                            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-600 bg-gray-800">
-                                {formData.image ? (
-                                    <img
-                                        src={formData.image}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`;
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-600">
-                                        No Image
+
+                                {formData.image && (
+                                    <div className="flex justify-center">
+                                        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-600 bg-gray-900">
+                                            <img
+                                                src={formData.image}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name)}&background=random`;
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Skills</label>
-                            <input
-                                type="text"
-                                value={formData.skills}
-                                onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            />
-                        </div>
+                        )}
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Skills (comma-separated)</label>
+                        <input
+                            type="text"
+                            value={formData.skills}
+                            onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="React, TypeScript, Node.js"
+                        />
                     </div>
 
                     <div className="border-t border-gray-700 pt-6">
@@ -202,6 +259,7 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                                     value={formData.linkedin}
                                     onChange={(e) => setFormData({ ...formData, linkedin: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://linkedin.com/in/username"
                                 />
                             </div>
                             <div>
@@ -211,6 +269,7 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                                     value={formData.twitter}
                                     onChange={(e) => setFormData({ ...formData, twitter: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://twitter.com/username"
                                 />
                             </div>
                             <div>
@@ -220,6 +279,7 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                                     value={formData.github}
                                     onChange={(e) => setFormData({ ...formData, github: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://github.com/username"
                                 />
                             </div>
                             <div>
@@ -229,6 +289,7 @@ export default function EditTeamMember({ params }: EditTeamMemberPageProps) {
                                     value={formData.dribbble}
                                     onChange={(e) => setFormData({ ...formData, dribbble: e.target.value })}
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://dribbble.com/username"
                                 />
                             </div>
                         </div>

@@ -2,15 +2,19 @@
 
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { createTeamMember } from "@/lib/firestore";
+import { createTeamMember, getTeamMembers } from "@/lib/firestore";
 import { TeamMember } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 export default function NewTeamMember() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         name: "",
         position: "",
@@ -29,12 +33,17 @@ export default function NewTeamMember() {
         setLoading(true);
 
         try {
+            // Get current team count for order assignment
+            const existingMembers = await getTeamMembers();
+            const nextOrder = existingMembers.length;
+
             const memberData: Omit<TeamMember, "id"> = {
                 name: formData.name,
                 position: formData.position,
                 bio: formData.bio,
                 image: formData.image,
                 skills: formData.skills.split(",").map((s) => s.trim()).filter(Boolean),
+                order: nextOrder, // Auto-assign order (last position)
                 social: {
                     linkedin: formData.linkedin || undefined,
                     twitter: formData.twitter || undefined,
@@ -70,6 +79,7 @@ export default function NewTeamMember() {
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* Name */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Name *</label>
                             <input
@@ -81,6 +91,8 @@ export default function NewTeamMember() {
                                 placeholder="Full name"
                             />
                         </div>
+
+                        {/* Position */}
                         <div>
                             <label className="block text-sm font-medium text-gray-300 mb-2">Position *</label>
                             <input
@@ -89,26 +101,75 @@ export default function NewTeamMember() {
                                 onChange={(e) => setFormData({ ...formData, position: e.target.value })}
                                 required
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                placeholder="e.g., Senior Developer"
+                                placeholder="Job title"
                             />
                         </div>
                     </div>
 
+                    {/* Bio - Rich Text Editor */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">Bio</label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.bio}
-                            onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-                            rows={3}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                            placeholder="Brief description about the team member..."
+                            onChange={(value) => setFormData({ ...formData, bio: value })}
+                            placeholder="Write a detailed bio for this team member..."
+                            minHeight="200px"
                         />
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex flex-col space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Profile Image URL</label>
+                    {/* Profile Photo Section */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">
+                            Profile Photo *
+                        </label>
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Photo
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="team"
+                                currentImageUrl={formData.image}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, image: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, image: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="square"
+                                seoName={formData.name}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
                                 <input
                                     type="url"
                                     value={formData.image}
@@ -116,39 +177,39 @@ export default function NewTeamMember() {
                                     className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
                                     placeholder="https://example.com/photo.jpg"
                                 />
-                            </div>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-4 bg-gray-900/50 rounded-lg border border-gray-700">
-                            <p className="text-xs text-gray-500 mb-2 uppercase font-bold tracking-wider text-center">Preview</p>
-                            <div className="w-24 h-24 rounded-full overflow-hidden border-2 border-gray-600 bg-gray-800">
-                                {formData.image ? (
-                                    <img
-                                        src={formData.image}
-                                        alt="Preview"
-                                        className="w-full h-full object-cover"
-                                        onError={(e) => {
-                                            (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Team+Member&background=random";
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-600">
-                                        No Image
+
+                                {formData.image && (
+                                    <div className="flex justify-center">
+                                        <div className="w-32 h-32 rounded-full overflow-hidden border-2 border-gray-600 bg-gray-900">
+                                            <img
+                                                src={formData.image}
+                                                alt="Preview"
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=Team+Member&background=random&size=128";
+                                                }}
+                                            />
+                                        </div>
                                     </div>
                                 )}
                             </div>
-                        </div>
-                        <div className="md:col-span-2">
-                            <label className="block text-sm font-medium text-gray-300 mb-2">Skills</label>
-                            <input
-                                type="text"
-                                value={formData.skills}
-                                onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
-                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                                placeholder="React, Node.js, TypeScript"
-                            />
-                        </div>
+                        )}
                     </div>
 
+                    {/* Skills */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Skills</label>
+                        <input
+                            type="text"
+                            value={formData.skills}
+                            onChange={(e) => setFormData({ ...formData, skills: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="React, Node.js, TypeScript"
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Separate skills with commas</p>
+                    </div>
+
+                    {/* Social Links Section */}
                     <div className="border-t border-gray-700 pt-6">
                         <h3 className="text-lg font-medium text-white mb-4">Social Links</h3>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -163,7 +224,7 @@ export default function NewTeamMember() {
                                 />
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-300 mb-2">Twitter</label>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Twitter / X</label>
                                 <input
                                     type="url"
                                     value={formData.twitter}
@@ -183,6 +244,16 @@ export default function NewTeamMember() {
                                 />
                             </div>
                             <div>
+                                <label className="block text-sm font-medium text-gray-300 mb-2">Facebook</label>
+                                <input
+                                    type="url"
+                                    value={formData.facebook}
+                                    onChange={(e) => setFormData({ ...formData, facebook: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://facebook.com/username"
+                                />
+                            </div>
+                            <div>
                                 <label className="block text-sm font-medium text-gray-300 mb-2">Dribbble</label>
                                 <input
                                     type="url"
@@ -196,6 +267,7 @@ export default function NewTeamMember() {
                     </div>
                 </div>
 
+                {/* Submit Button */}
                 <div className="flex justify-end gap-4">
                     <Link
                         href="/admin/team"

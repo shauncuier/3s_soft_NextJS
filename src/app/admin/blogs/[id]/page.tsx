@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { getBlogBySlug, updateBlog, getBlogs } from "@/lib/firestore";
 import { Blog } from "@/types/firestore";
 import Link from "next/link";
-import { FiArrowLeft, FiSave, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiArrowLeft, FiSave, FiEye, FiEyeOff, FiImage, FiLink } from "react-icons/fi";
 import toast from "react-hot-toast";
+import ImageUpload from "@/components/ImageUpload";
+import RichTextEditor from "@/components/RichTextEditor";
 
 interface EditBlogPageProps {
     params: Promise<{ id: string }>;
@@ -17,6 +19,8 @@ export default function EditBlog({ params }: EditBlogPageProps) {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [imagePath, setImagePath] = useState<string>("");
+    const [imageInputMode, setImageInputMode] = useState<"upload" | "url">("upload");
     const [formData, setFormData] = useState({
         title: "",
         slug: "",
@@ -32,7 +36,6 @@ export default function EditBlog({ params }: EditBlogPageProps) {
     useEffect(() => {
         async function fetchBlog() {
             try {
-                // First get all blogs to find by ID
                 const blogs = await getBlogs(false);
                 const blog = blogs.find((b) => b.id === id);
 
@@ -48,6 +51,10 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                         readTime: blog.readTime,
                         published: blog.published,
                     });
+                    // Detect if image URL is external or uploaded
+                    if (blog.imageUrl && !blog.imageUrl.includes("firebasestorage")) {
+                        setImageInputMode("url");
+                    }
                 } else {
                     toast.error("Blog not found");
                     router.push("/admin/blogs");
@@ -63,6 +70,22 @@ export default function EditBlog({ params }: EditBlogPageProps) {
         fetchBlog();
     }, [id, router]);
 
+    const calculateReadTime = (content: string) => {
+        const wordsPerMinute = 200;
+        const textContent = content.replace(/<[^>]*>/g, "");
+        const wordCount = textContent.split(/\s+/).filter(Boolean).length;
+        const minutes = Math.ceil(wordCount / wordsPerMinute);
+        return minutes <= 1 ? "1 min read" : `${minutes} min read`;
+    };
+
+    const handleContentChange = (content: string) => {
+        setFormData({
+            ...formData,
+            content,
+            readTime: calculateReadTime(content),
+        });
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
         setSaving(true);
@@ -76,7 +99,7 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                 imageUrl: formData.imageUrl,
                 author: formData.author,
                 tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
-                readTime: formData.readTime,
+                readTime: formData.readTime || calculateReadTime(formData.content),
                 published: formData.published,
             };
 
@@ -124,6 +147,7 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                             onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                             required
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="Enter blog title"
                         />
                     </div>
 
@@ -137,7 +161,11 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                             value={formData.slug}
                             onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="blog-post-url-slug"
                         />
+                        <p className="text-xs text-gray-500 mt-1">
+                            URL: /blog/{formData.slug || "your-slug-here"}
+                        </p>
                     </div>
 
                     {/* Excerpt */}
@@ -151,34 +179,101 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                             required
                             rows={2}
                             className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="Brief description for blog listing..."
                         />
                     </div>
 
-                    {/* Content */}
+                    {/* Rich Text Editor for Content */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
                             Content *
                         </label>
-                        <textarea
+                        <RichTextEditor
                             value={formData.content}
-                            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-                            required
-                            rows={12}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500 font-mono text-sm"
+                            onChange={handleContentChange}
+                            placeholder="Write your blog content here..."
+                            minHeight="400px"
                         />
+                        <p className="text-xs text-gray-500 mt-2">
+                            {formData.readTime || "0 min read"} • Use the toolbar to format text, add images, links, and more.
+                        </p>
                     </div>
 
-                    {/* Image URL */}
+                    {/* Featured Image Section */}
                     <div>
                         <label className="block text-sm font-medium text-gray-300 mb-2">
-                            Featured Image URL
+                            Featured Image *
                         </label>
-                        <input
-                            type="url"
-                            value={formData.imageUrl}
-                            onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
-                        />
+
+                        {/* Image Input Mode Toggle */}
+                        <div className="flex gap-2 mb-4">
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("upload")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "upload"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiImage className="w-4 h-4" />
+                                Upload Image
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setImageInputMode("url")}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${imageInputMode === "url"
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                                    }`}
+                            >
+                                <FiLink className="w-4 h-4" />
+                                Image URL
+                            </button>
+                        </div>
+
+                        {/* Upload Mode */}
+                        {imageInputMode === "upload" && (
+                            <ImageUpload
+                                folder="blogs"
+                                currentImageUrl={formData.imageUrl}
+                                onUploadComplete={(url, path) => {
+                                    setFormData({ ...formData, imageUrl: url });
+                                    setImagePath(path);
+                                }}
+                                onDelete={() => {
+                                    setFormData({ ...formData, imageUrl: "" });
+                                    setImagePath("");
+                                }}
+                                aspectRatio="landscape"
+                                seoName={formData.title}
+                            />
+                        )}
+
+                        {/* URL Mode */}
+                        {imageInputMode === "url" && (
+                            <div className="space-y-4">
+                                <input
+                                    type="url"
+                                    value={formData.imageUrl}
+                                    onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                                    className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                    placeholder="https://example.com/image.jpg"
+                                />
+
+                                {formData.imageUrl && (
+                                    <div className="relative aspect-video w-full max-w-md rounded-lg overflow-hidden border border-gray-600 bg-gray-900">
+                                        <img
+                                            src={formData.imageUrl}
+                                            alt="Preview"
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => {
+                                                (e.target as HTMLImageElement).src = "https://placehold.co/800x450/1f2937/9ca3af?text=Invalid+Image+URL";
+                                            }}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -193,6 +288,7 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                                 onChange={(e) => setFormData({ ...formData, author: e.target.value })}
                                 required
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="Author name"
                             />
                         </div>
 
@@ -206,6 +302,7 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                                 value={formData.tags}
                                 onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="tag1, tag2, tag3"
                             />
                         </div>
 
@@ -219,7 +316,11 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                                 value={formData.readTime}
                                 onChange={(e) => setFormData({ ...formData, readTime: e.target.value })}
                                 className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="Auto-calculated"
                             />
+                            <p className="text-xs text-gray-500 mt-1">
+                                Auto-calculated based on content
+                            </p>
                         </div>
                     </div>
 
@@ -229,8 +330,8 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                             type="button"
                             onClick={() => setFormData({ ...formData, published: !formData.published })}
                             className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${formData.published
-                                    ? "bg-green-500 text-white"
-                                    : "bg-gray-700 text-gray-300"
+                                ? "bg-green-500 text-white"
+                                : "bg-gray-700 text-gray-300"
                                 }`}
                         >
                             {formData.published ? (
@@ -243,6 +344,9 @@ export default function EditBlog({ params }: EditBlogPageProps) {
                                 </>
                             )}
                         </button>
+                        <span className="text-sm text-gray-500">
+                            {formData.published ? "Post is visible on the website" : "Post is saved as draft"}
+                        </span>
                     </div>
                 </div>
 
