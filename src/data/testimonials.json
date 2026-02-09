@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "name": "Sarah Johnson",
+    "position": "CEO, TechStart Inc.",
+    "company": "TechStart Inc.",
+    "image": "https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 5,
+    "testimonial": "3S-SOFT transformed our online presence completely. Their MERN stack development skills are exceptional, and they delivered our project ahead of schedule. The team's attention to detail and communication throughout the process was outstanding.",
+    "project": "Custom Web Application"
+  },
+  {
+    "id": 2,
+    "name": "Michael Chen",
+    "position": "Founder, EcoShop",
+    "company": "EcoShop",
+    "image": "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 5,
+    "testimonial": "Working with 3S-SOFT for our eCommerce product listings was a game-changer. They optimized our Amazon and eBay listings perfectly, resulting in a 300% increase in sales within the first month. Highly recommended!",
+    "project": "eCommerce Product Listing"
+  },
+  {
+    "id": 3,
+    "name": "Emily Rodriguez",
+    "position": "Marketing Director, GrowthCo",
+    "company": "GrowthCo",
+    "image": "https://images.pexels.com/photos/3763188/pexels-photo-3763188.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 4,
+    "testimonial": "The digital marketing and SEO services provided by 3S-SOFT exceeded our expectations. Our website traffic increased by 250% and lead generation improved significantly. Their strategic approach is impressive.",
+    "project": "Digital Marketing & SEO"
+  },
+  {
+    "id": 4,
+    "name": "David Thompson",
+    "position": "Owner, Local Bistro",
+    "company": "Local Bistro",
+    "image": "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 5,
+    "testimonial": "3S-SOFT created a beautiful WordPress website for our restaurant. The design is modern, mobile-friendly, and perfectly represents our brand. Customer inquiries have doubled since the launch!",
+    "project": "WordPress Development"
+  },
+  {
+    "id": 5,
+    "name": "Lisa Wang",
+    "position": "Startup Founder, InnovateLab",
+    "company": "InnovateLab",
+    "image": "https://images.pexels.com/photos/3756679/pexels-photo-3756679.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 5,
+    "testimonial": "From concept to launch, 3S-SOFT was with us every step of the way. Their virtual assistant services and lead generation strategies helped us scale rapidly. Professional, reliable, and results-driven team.",
+    "project": "Complete Digital Solution"
+  },
+  {
+    "id": 6,
+    "name": "Robert Kim",
+    "position": "E-commerce Manager, StyleHub",
+    "company": "StyleHub",
+    "image": "https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=400",
+    "rating": 4,
+    "testimonial": "The graphic design and social media marketing services from 3S-SOFT elevated our brand presence significantly. Their creative designs and strategic campaigns resulted in 400% growth in social media engagement.",
+    "project": "Branding & Social Media"
+  }
+]

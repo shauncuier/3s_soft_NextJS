@@ -1,0 +1,378 @@
+"use client";
+
+import { useEffect, useState, FormEvent, use } from "react";
+import { useRouter } from "next/navigation";
+import { db } from "@/firebase/firebase.config";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import Link from "next/link";
+import { FiArrowLeft, FiSave, FiPlus, FiTrash2, FiMove } from "react-icons/fi";
+import toast from "react-hot-toast";
+import { Service } from "@/types/firestore";
+
+interface EditServicePageProps {
+    params: Promise<{ id: string }>;
+}
+
+export default function EditService({ params }: EditServicePageProps) {
+    const { id } = use(params);
+    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [saving, setSaving] = useState(false);
+    const [formData, setFormData] = useState({
+        title: "",
+        slug: "",
+        shortDescription: "",
+        fullDescription: "",
+        icon: "",
+        gradient: "",
+        seoTitle: "",
+        seoDescription: "",
+    });
+    const [features, setFeatures] = useState<string[]>([]);
+    const [benefits, setBenefits] = useState<string[]>([]);
+    const [process, setProcess] = useState<{ step: string; description: string }[]>([]);
+
+    useEffect(() => {
+        async function fetchService() {
+            try {
+                const docRef = doc(db, "services", id);
+                const docSnap = await getDoc(docRef);
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data() as Service;
+                    setFormData({
+                        title: data.title,
+                        slug: data.slug,
+                        shortDescription: data.shortDescription,
+                        fullDescription: data.fullDescription,
+                        icon: data.icon,
+                        gradient: data.gradient || "",
+                        seoTitle: data.seoTitle || "",
+                        seoDescription: data.seoDescription || "",
+                    });
+                    setFeatures(data.features || []);
+                    setBenefits(data.benefits || []);
+                    setProcess(data.process || []);
+                } else {
+                    toast.error("Service not found");
+                    router.push("/admin/services");
+                }
+            } catch (error) {
+                console.error("Error fetching service:", error);
+                toast.error("Failed to load service");
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        fetchService();
+    }, [id, router]);
+
+    const handleAddFeature = () => setFeatures([...features, ""]);
+    const handleRemoveFeature = (index: number) => setFeatures(features.filter((_, i) => i !== index));
+    const handleFeatureChange = (index: number, value: string) => {
+        const newFeatures = [...features];
+        newFeatures[index] = value;
+        setFeatures(newFeatures);
+    };
+
+    const handleAddBenefit = () => setBenefits([...benefits, ""]);
+    const handleRemoveBenefit = (index: number) => setBenefits(benefits.filter((_, i) => i !== index));
+    const handleBenefitChange = (index: number, value: string) => {
+        const newBenefits = [...benefits];
+        newBenefits[index] = value;
+        setBenefits(newBenefits);
+    };
+
+    const handleAddProcess = () => setProcess([...process, { step: "", description: "" }]);
+    const handleRemoveProcess = (index: number) => setProcess(process.filter((_, i) => i !== index));
+    const handleProcessChange = (index: number, field: "step" | "description", value: string) => {
+        const newProcess = [...process];
+        newProcess[index] = { ...newProcess[index], [field]: value };
+        setProcess(newProcess);
+    };
+
+    const handleSubmit = async (e: FormEvent) => {
+        e.preventDefault();
+        setSaving(true);
+
+        try {
+            const docRef = doc(db, "services", id);
+            await updateDoc(docRef, {
+                ...formData,
+                features: features.filter(Boolean),
+                benefits: benefits.filter(Boolean),
+                process: process.filter(p => p.step || p.description),
+            });
+            toast.success("Service updated successfully!");
+            router.push("/admin/services");
+        } catch (error) {
+            console.error("Error updating service:", error);
+            toast.error("Failed to update service");
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-4xl pb-20">
+            <div className="flex items-center gap-4 mb-8">
+                <Link
+                    href="/admin/services"
+                    className="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                    <FiArrowLeft className="w-5 h-5" />
+                </Link>
+                <h1 className="text-3xl font-bold text-white">Edit Service</h1>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-8">
+                {/* Basic Info */}
+                <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-6">
+                    <h2 className="text-xl font-bold text-white border-b border-gray-700 pb-2">Basic Information</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Title *</label>
+                            <input
+                                type="text"
+                                value={formData.title}
+                                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                                required
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Icon (React Icon Name) *</label>
+                            <input
+                                type="text"
+                                value={formData.icon}
+                                onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                                required
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="FiCode, FaServer, etc."
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Slug</label>
+                            <input
+                                type="text"
+                                value={formData.slug}
+                                onChange={(e) => setFormData({ ...formData, slug: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-300 mb-2">Gradient (CSS classes)</label>
+                            <input
+                                type="text"
+                                value={formData.gradient}
+                                onChange={(e) => setFormData({ ...formData, gradient: e.target.value })}
+                                className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                                placeholder="from-blue-500 to-purple-600"
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Short Description *</label>
+                        <textarea
+                            value={formData.shortDescription}
+                            onChange={(e) => setFormData({ ...formData, shortDescription: e.target.value })}
+                            required
+                            rows={2}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        />
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Full Description *</label>
+                        <textarea
+                            value={formData.fullDescription}
+                            onChange={(e) => setFormData({ ...formData, fullDescription: e.target.value })}
+                            required
+                            rows={6}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                        />
+                    </div>
+                </div>
+
+                {/* Features & Benefits */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Features */}
+                    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Features</h2>
+                            <button
+                                type="button"
+                                onClick={handleAddFeature}
+                                className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-500/20 transition-colors"
+                            >
+                                <FiPlus className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {features.map((feature, index) => (
+                                <div key={index} className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={feature}
+                                        onChange={(e) => handleFeatureChange(index, e.target.value)}
+                                        className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                                        placeholder={`Feature ${index + 1}`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveFeature(index)}
+                                        className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                    >
+                                        <FiTrash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            ))}
+                            {features.length === 0 && <p className="text-gray-500 text-sm italic">No features added yet.</p>}
+                        </div>
+                    </div>
+
+                    {/* Benefits */}
+                    <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-4">
+                        <div className="flex justify-between items-center">
+                            <h2 className="text-xl font-bold text-white">Benefits</h2>
+                            <button
+                                type="button"
+                                onClick={handleAddBenefit}
+                                className="p-2 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-500/20 transition-colors"
+                            >
+                                <FiPlus className="w-5 h-5" />
+                            </button>
+                        </div>
+                        <div className="space-y-3">
+                            {benefits.map((benefit, index) => (
+                                <div key={index} className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={benefit}
+                                        onChange={(e) => handleBenefitChange(index, e.target.value)}
+                                        className="flex-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                                        placeholder={`Benefit ${index + 1}`}
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveBenefit(index)}
+                                        className="p-2 text-gray-500 hover:text-red-400 transition-colors"
+                                    >
+                                        <FiTrash2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            ))}
+                            {benefits.length === 0 && <p className="text-gray-500 text-sm italic">No benefits added yet.</p>}
+                        </div>
+                    </div>
+                </div>
+
+                {/* Development Process */}
+                <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-4">
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-xl font-bold text-white">Work Process</h2>
+                            <p className="text-sm text-gray-400">Define the steps for this service</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleAddProcess}
+                            className="flex items-center gap-2 px-4 py-2 bg-purple-500/10 text-purple-400 rounded-lg hover:bg-purple-500/20 transition-colors"
+                        >
+                            <FiPlus className="w-4 h-4" /> Add Step
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {process.map((step, index) => (
+                            <div key={index} className="p-4 bg-gray-900/50 rounded-xl border border-gray-700 space-y-3">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-xs font-bold text-purple-400 uppercase tracking-widest">Step {index + 1}</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemoveProcess(index)}
+                                        className="text-gray-500 hover:text-red-400 transition-colors"
+                                    >
+                                        <FiTrash2 className="w-4 h-4" />
+                                    </button>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                    <input
+                                        type="text"
+                                        value={step.step}
+                                        onChange={(e) => handleProcessChange(index, "step", e.target.value)}
+                                        className="md:col-span-1 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                                        placeholder="Step Name (e.g. Planning)"
+                                    />
+                                    <input
+                                        type="text"
+                                        value={step.description}
+                                        onChange={(e) => handleProcessChange(index, "description", e.target.value)}
+                                        className="md:col-span-2 px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white text-sm focus:outline-none focus:border-blue-500"
+                                        placeholder="Detailed description of this step..."
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                        {process.length === 0 && <p className="text-gray-500 text-sm italic text-center py-4">No process steps defined.</p>}
+                    </div>
+                </div>
+
+                {/* SEO Settings */}
+                <div className="bg-gray-800 rounded-xl p-6 border border-gray-700 space-y-6">
+                    <h2 className="text-xl font-bold text-white border-b border-gray-700 pb-2">SEO Settings</h2>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Meta Title</label>
+                        <input
+                            type="text"
+                            value={formData.seoTitle}
+                            onChange={(e) => setFormData({ ...formData, seoTitle: e.target.value })}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="SEO Optimized Title"
+                        />
+                    </div>
+                    <div>
+                        <label className="block text-sm font-medium text-gray-300 mb-2">Meta Description</label>
+                        <textarea
+                            value={formData.seoDescription}
+                            onChange={(e) => setFormData({ ...formData, seoDescription: e.target.value })}
+                            rows={3}
+                            className="w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-white focus:outline-none focus:border-blue-500"
+                            placeholder="SEO Meta Description"
+                        />
+                    </div>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                    <Link
+                        href="/admin/services"
+                        className="px-6 py-3 bg-gray-700 text-white rounded-lg hover:bg-gray-600 transition-colors"
+                    >
+                        Cancel
+                    </Link>
+                    <button
+                        type="submit"
+                        disabled={saving}
+                        className="flex items-center gap-2 px-6 py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors disabled:opacity-50"
+                    >
+                        <FiSave className="w-5 h-5" />
+                        {saving ? "Saving..." : "Update Service"}
+                    </button>
+                </div>
+            </form>
+        </div>
+    );
+}

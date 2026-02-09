@@ -1,0 +1,31 @@
+
+> 3s-soft-nextjs@0.1.0 build
+> next build
+
+   Γû▓ Next.js 15.1.0
+   - Environments: .env.local
+
+   Creating an optimized production build ...
+/*! ≡ƒî╝ daisyUI 5.5.18 */
+Found 1 warning while optimizing generated CSS:
+
+Γöé }
+Γöé @layer base {
+Γöé   @property --radialprogress {
+Γöå            ^-- Unknown at rule: @property
+Γöå
+Γöé     syntax: "<percentage>";
+Γöé     inherits: true;
+
+ Γ£ô Compiled successfully
+   Linting and checking validity of types ...
+   Collecting page data ...
+[Error [PageNotFoundError]: Cannot find module for page: /blogs] {
+  code: 'ENOENT'
+}
+[Error [PageNotFoundError]: Cannot find module for page: /contact] {
+  code: 'ENOENT'
+}
+
+> Build error occurred
+[Error: Failed to collect page data for /blogs] { type: 'Error' }

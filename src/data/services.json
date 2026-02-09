@@ -1,0 +1,162 @@
+[
+    {
+        "slug": "web-development-mern",
+        "icon": "FaCode",
+        "title": "Web Development (MERN Stack)",
+        "description": "Full-stack custom web apps, dashboards, and dynamic websites built with MongoDB, Express, React, and Node.js.",
+        "gradient": "from-blue-500 to-purple-600",
+        "features": [
+            "Custom Web Applications",
+            "Dynamic Dashboards",
+            "API Integration",
+            "Database Design",
+            "Single Page Applications (SPA)",
+            "Secure Authentication Systems",
+            "Real-time Data Processing",
+            "Scalable Infrastructure"
+        ],
+        "fullContent": "At 3S-SOFT, we specialize in building robust, scalable, and high-performance web applications using the MERN stack (MongoDB, Express.js, React, and Node.js). Our approach focuses on delivering seamless user experiences combined with powerful backend functionality. Whether you need a simple dynamic website or a complex enterprise-level dashboard, our team of expert developers ensures your vision is translated into a cutting-edge digital product.",
+        "seoTitle": "Advanced MERN Stack Web Development Services | 3S-SOFT",
+        "seoDescription": "Expert MERN stack development for startups and enterprises. We build scalable, secure, and high-performance web applications using React, Node.js, and MongoDB."
+    },
+    {
+        "slug": "wordpress-customization",
+        "icon": "FaWordpress",
+        "title": "WordPress Customization",
+        "description": "Fast, secure, SEO-optimized WordPress sites tailored to your brand and goals.",
+        "gradient": "from-green-500 to-teal-600",
+        "features": [
+            "Custom Themes",
+            "Plugin Development",
+            "SEO Optimization",
+            "Performance Enhancement",
+            "E-commerce (WooCommerce)",
+            "Security Hardening",
+            "Maintenance & Support",
+            "Migration Services"
+        ],
+        "fullContent": "Unlock the full potential of WordPress with 3S-SOFT's custom development services. We go beyond basic templates to create unique, high-performance websites that truly represent your brand. From custom theme and plugin development to performance optimization and robust security measures, we ensure your WordPress site is fast, scalable, and easy to manage.",
+        "seoTitle": "Custom WordPress Development & SEO Optimization | 3S-SOFT",
+        "seoDescription": "Professional WordPress customization services. We create fast, secure, and SEO-optimized sites with custom themes, plugins, and full WooCommerce support."
+    },
+    {
+        "slug": "ecommerce-product-listing",
+        "icon": "FaShoppingCart",
+        "title": "Product Listing for eCommerce",
+        "description": "Bulk or individual product uploads for Amazon, eBay, Etsy, Walmart, and more — with keyword optimization.",
+        "gradient": "from-orange-500 to-red-600",
+        "features": [
+            "Amazon Listing",
+            "eBay Integration",
+            "Keyword Optimization",
+            "Image Processing",
+            "Etsy Store Management",
+            "Walmart Listing Services",
+            "Inventory Management",
+            "A+ Content Design"
+        ],
+        "fullContent": "Maximize your sales potential across global marketplaces with 3S-SOFT's expert product listing services. We handle the complexities of listing products on Amazon, eBay, Etsy, Walmart, and more. Our team ensures every listing is optimized with the right keywords, high-quality images, and compelling descriptions to improve visibility and conversion rates.",
+        "seoTitle": "Professional eCommerce Product Listing & Management | 3S-SOFT",
+        "seoDescription": "Optimize your online store with expert product listing services for Amazon, eBay, and Etsy. We provide keyword optimization and bulk upload support."
+    },
+    {
+        "slug": "lead-generation",
+        "icon": "FaBullseye",
+        "title": "Lead Generation",
+        "description": "High-quality B2B/B2C leads for your niche through modern tools and proven methods.",
+        "gradient": "from-purple-500 to-pink-600",
+        "features": [
+            "B2B Lead Generation",
+            "B2C Campaigns",
+            "Data Analytics",
+            "CRM Integration",
+            "Email Outreach",
+            "LinkedIn Prospecting",
+            "Market Research",
+            "Lead Scoring"
+        ],
+        "fullContent": "Grow your sales pipeline with 3S-SOFT's data-driven lead generation services. We use advanced tools and proven strategies to identify and connect you with high-quality B2B and B2C prospects. From market research and LinkedIn outreach to custom email campaigns and CRM integration, we provide the fuel your sales team needs to thrive.",
+        "seoTitle": "Targeted B2B & B2C Lead Generation Services | 3S-SOFT",
+        "seoDescription": "Fuel your sales with high-quality B2B and B2C leads. Our data-driven strategies help you reach the right audience and increase conversion rates."
+    },
+    {
+        "slug": "digital-marketing-seo",
+        "icon": "FaSearch",
+        "title": "Digital Marketing & SEO",
+        "description": "Drive traffic and sales with our result-oriented SEO, local SEO, and search engine optimization strategies.",
+        "gradient": "from-cyan-500 to-blue-600",
+        "features": [
+            "SEO Optimization",
+            "Local SEO",
+            "Content Marketing",
+            "Analytics Tracking",
+            "Technical SEO Audits",
+            "Backlink Strategy",
+            "PPC Management",
+            "Keyword Research"
+        ],
+        "fullContent": "Dominate search engine results and drive targeted traffic with 3S-SOFT's comprehensive digital marketing and SEO services. We employ white-hat SEO techniques, local optimization, and strategic content marketing to boost your online visibility. Our data-led approach ensures that every campaign is tracked and optimized for maximum ROI.",
+        "seoTitle": "Effective Digital Marketing & Data-Driven SEO | 3S-SOFT",
+        "seoDescription": "Boost your online presence with expert SEO and digital marketing. We provide technical audits, local SEO, and result-oriented growth strategies."
+    },
+    {
+        "slug": "social-media-marketing",
+        "icon": "FaFacebook",
+        "title": "Social Media Marketing",
+        "description": "Boost visibility and engagement with tailored campaigns on Facebook, Instagram, LinkedIn, and other platforms.",
+        "gradient": "from-pink-500 to-rose-600",
+        "features": [
+            "Content Creation",
+            "Campaign Management",
+            "Audience Targeting",
+            "Performance Metrics",
+            "Social Media Strategy",
+            "Paid Advertising",
+            "Community Management",
+            "Influencer Outreach"
+        ],
+        "fullContent": "Build a powerful brand presence and engage with your audience on the platforms that matter most. 3S-SOFT's social media marketing services include strategic content creation, targeted ad campaigns, and proactive community management across Facebook, Instagram, LinkedIn, and more. We turn social followers into brand advocates.",
+        "seoTitle": "Strategic Social Media Marketing & Brand Growth | 3S-SOFT",
+        "seoDescription": "Transform your brand with expert social media marketing. We create engaging content and targeted ad campaigns for all major platforms."
+    },
+    {
+        "slug": "graphic-design",
+        "icon": "FaPaintBrush",
+        "title": "Graphic Design",
+        "description": "Professional logos, banners, social media creatives, print design, and more.",
+        "gradient": "from-yellow-500 to-orange-600",
+        "features": [
+            "Logo Design",
+            "Brand Identity",
+            "Print Design",
+            "Digital Creatives",
+            "UI/UX Design",
+            "Social Media Graphics",
+            "Infographic Design",
+            "Vector Illustration"
+        ],
+        "fullContent": "Communicate your brand's story through stunning visual design. 3S-SOFT's creative team specializes in logo design, brand identity, and a wide range of digital and print creatives. We combine artistic vision with marketing strategy to create visuals that not only look great but also drive engagement and brand loyalty.",
+        "seoTitle": "Creative Graphic Design & Brand Identity Services | 3S-SOFT",
+        "seoDescription": "Elevate your brand with professional graphic design. From logo creation to full brand identity, we deliver stunning visual solutions."
+    },
+    {
+        "slug": "virtual-assistant",
+        "icon": "FaHeadphones",
+        "title": "Virtual Assistant Services",
+        "description": "Reliable support for tasks like data entry, email management, research, product uploads, and CRM updates.",
+        "gradient": "from-indigo-500 to-purple-600",
+        "features": [
+            "Data Entry",
+            "Email Management",
+            "Research Tasks",
+            "Administrative Support",
+            "CRM Management",
+            "Customer Support",
+            "Scheduling",
+            "Document Preparation"
+        ],
+        "fullContent": "Free up your time and focus on core business activities with 3S-SOFT's professional virtual assistant services. Our assistants are skilled in data management, administrative support, customer research, and more. We provide the reliable, efficient support you need to keep your business running smoothly without the overhead of a full-time employee.",
+        "seoTitle": "Reliable Virtual Assistant & Administrative Services | 3S-SOFT",
+        "seoDescription": "Boost productivity with professional virtual assistant services. We handle data entry, email management, and administrative support tasks."
+    }
+]

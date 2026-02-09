@@ -1,0 +1,42 @@
+# 3S-SOFT - Full Context
+
+## Company Overview
+3S-SOFT is a technology-driven digital agency that bridges the gap between complex business requirements and scalable software solutions. We focus on modern frameworks like React and Node.js while maintaining expert proficiency in worldwide eCommerce platforms.
+
+## Detailed Service Breakdown
+
+### 1. Web Development (MERN Stack)
+- [Details & Pricing](https://3s-soft.com/services/web-development-mern)
+- End-to-end development of Single Page Applications (SPAs).
+- Responsive UI/UX design using Tailwind CSS.
+- Robust backend systems with Node.js and Express.
+
+### 2. WordPress Customization
+- [Details & Solutions](https://3s-soft.com/services/wordpress-customization)
+- Tailored WordPress themes and plugin configuration.
+- Performance optimization and security hardening.
+
+### 3. eCommerce & Product Listing
+- [Marketplace Services](https://3s-soft.com/services/ecommerce-product-listing)
+- Specialized managed services for Amazon Seller Central, eBay, Walmart, and Etsy.
+- SEO-optimized product descriptions and bulk listing management.
+
+### 4. SEO & Digital Marketing
+- [Growth Strategies](https://3s-soft.com/services/digital-marketing-seo)
+- On-page, off-page, and technical SEO audits.
+- Lead generation through data-driven campaigns.
+- Social Media Marketing (SMM) across Facebook, LinkedIn, Instagram.
+
+### 5. Virtual Assistant (VA) Services
+- [Outsourcing Details](https://3s-soft.com/services/virtual-assistant)
+- Administrative support, market research, and data entry.
+- Email management and scheduling.
+
+## Technical Environment
+- **Front-end**: React 19, Vite, Tailwind CSS (v4), DaisyUI.
+- **Back-end Integration**: Axios, Environment-driven API configurations.
+- **SEO & Search Readiness**: JSON-LD Structured Data, Dynamic Meta Tags, XML Sitemaps.
+- **Hosting Target**: https://3s-soft.com
+
+## Values
+Passion, Precision, and Partnership. We build long-term relationships with clients by delivering measurable digital success.

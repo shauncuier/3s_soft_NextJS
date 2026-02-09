@@ -1,0 +1,31 @@
+# 3S-SOFT (https://3s-soft.com)
+
+> A premium digital engineering and growth agency. 3S-SOFT specializes in scalable MERN stack development, comprehensive eCommerce managed services (Amazon, eBay, etc.), and advanced SEO strategies for US and UK markets.
+
+## Agency Vision
+To empower businesses by bridging the gap between innovative code and measurable digital growth. We don't just build websites; we engineer business solutions.
+
+## Service Portfolio (TL;DR)
+- **Software Engineering**: Full-stack MERN (MongoDB, Express, React 19, Node.js).
+- **Global eCommerce**: Advanced store management and product optimization for Amazon, eBay, Walmart, and Etsy.
+- **Organic Growth**: Technical SEO, content strategy, and data-driven lead generation.
+- **Operations Support**: Trained Virtual Assistants for startup administrative and technical efficiency.
+
+## Core Resources
+- [Main Services Hub](https://3s-soft.com/services)
+- [MERN Stack Development](https://3s-soft.com/services/web-development-mern)
+- [WordPress Customization](https://3s-soft.com/services/wordpress-customization)
+- [eCommerce listing](https://3s-soft.com/services/ecommerce-product-listing)
+- [Lead Generation](https://3s-soft.com/services/lead-generation)
+- [SEO & Marketing](https://3s-soft.com/services/digital-marketing-seo)
+- [Social Media Management](https://3s-soft.com/services/social-media-marketing)
+- [Graphic Design](https://3s-soft.com/services/graphic-design)
+- [Virtual Assistant](https://3s-soft.com/services/virtual-assistant)
+- [Insights & Blog](https://3s-soft.com/blogs)
+- [Team Expertise](https://3s-soft.com/team)
+- [Contact & Support](https://3s-soft.com/contact)
+
+## Machine Readability
+- [Comprehensive LLM Documentation](/llms-full.txt)
+- [Sitemap](/sitemap.xml)
+- [Privacy Compliance](/privacy-policy)

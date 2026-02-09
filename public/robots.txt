@@ -1,0 +1,35 @@
+# Optimized robots.txt for 3S-SOFT
+User-agent: *
+Allow: /
+Disallow: /dashboard/
+Disallow: /login
+Disallow: /register
+Disallow: /404
+
+# Sitemaps
+Sitemap: https://3s-soft.com/sitemap.xml
+
+# AI / LLM Crawler instructions
+User-agent: GPTBot
+Allow: /
+Disallow: /dashboard/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /dashboard/
+
+User-agent: OAI-SearchBot
+Allow: /
+Disallow: /dashboard/
+
+User-agent: Claude-Web
+Allow: /
+Disallow: /dashboard/
+
+User-agent: CCBot
+Allow: /
+Disallow: /dashboard/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /dashboard/

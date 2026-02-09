@@ -1,0 +1,161 @@
+[
+  {
+    "id": 1,
+    "name": "Jashedul Islam Shaun",
+    "position": "Founder & CEO",
+    "bio": "Full-stack developer with 8+ years of experience in MERN stack and digital transformation.",
+    "image": "/assets/team-profile/Jashedul_Islam_Shaun.png",
+    "skills": [
+      "MERN Stack",
+      "Project Management",
+      "Digital Strategy"
+    ],
+    "social": {
+      "linkedin": "https://bd.linkedin.com/in/jashedulislamshaun",
+      "github": "https://github.com/shauncuier",
+      "twitter": "https://x.com/jashedulislams",
+      "facebook": "https://www.facebook.com/jashedulislamshaun"
+    }
+  },
+  {
+    "id": 2,
+    "name": "Oahidul Islam Sajib",
+    "position": "Co-Founder & Creative Director",
+    "bio": "Creative designer specializing in UI/UX design and brand identity with a passion for user-centered design.",
+    "image": "/assets/team-profile/Oahidul_Islam_Sajib.png",
+    "skills": [
+      "UI/UX Design",
+      "Brand Identity",
+      "Graphic Design"
+    ],
+    "social": {
+      "linkedin": "#",
+      "twitter": "#",
+      "facebook": "#"
+    }
+  },
+  {
+    "id": 3,
+    "name": "Rakibul Hasan",
+    "position": "Senior Front End Developer",
+    "bio": "Experienced Front-End Developer with a thirst for staying updated on the latest trends in web development.",
+    "image": "/assets/team-profile/Rakibul_Hasan.png",
+    "skills": [
+      "React",
+      "Node.js",
+      "MongoDB",
+      "Next.js",
+      "Tailwind CSS",
+      "Figma",
+      "Firebase"
+    ],
+    "social": {
+      "linkedin": "https://www.linkedin.com/in/mrakibulhasan/",
+      "github": "https://github.com/rhakib",
+      "facebook": "https://www.facebook.com/Iamrakibhassan"
+    }
+  },
+  {
+    "id": 5,
+    "name": "Maptaul Islam Taraq",
+    "position": "Full Stack Developer",
+    "bio": "Full stack developer with expertise in MERN stack, building dynamic and responsive web applications.",
+    "image": "/assets/team-profile/Maptaul_Islam_Taraq.png",
+    "skills": [
+      "JavaScript(ES6+)",
+      "TypeScript",
+      "React Js",
+      "Node Js",
+      "Express Js",
+      "MongoDB",
+      "Figma",
+      "Tailwind CSS",
+      "Firebase"
+    ],
+    "social": {
+      "linkedin": "https://www.linkedin.com/in/maptaul/",
+      "github": "https://github.com/Maptaul",
+      "facebook": "https://www.facebook.com/Maptaul"
+    }
+  },
+  {
+    "id": 6,
+    "name": "Borhan Siddque",
+    "position": "Frontend Developer",
+    "bio": "Frontend developer with mern stack expertise, focusing on responsive and accessible web applications.",
+    "image": "/assets/team-profile/Borhan_Siddque.png",
+    "skills": [
+      "React Js",
+      "Node Js",
+      "Express Js",
+      "MongoDB",
+      "Figma",
+      "Tailwind CSS",
+      "Firebase"
+    ],
+    "social": {
+      "linkedin": "https://www.linkedin.com/in/borhan-siddque/",
+      "github": "https://github.com/borhansiddque",
+      "facebook": "https://www.facebook.com/borhan.siddque.19/",
+      "website": "https://borhansiddque.netlify.app/"
+    }
+  },
+  {
+    "id": 4,
+    "name": "Md. Shahidul Islam",
+    "position": "Digital Marketing Specialist",
+    "bio": "SEO expert and social media strategist helping businesses grow and online presence effectively.",
+    "image": "/assets/team-profile/Shamim.png",
+    "skills": [
+      "SEO",
+      "Content Writing",
+      "Meta Ads",
+      "Social Media Management"
+    ],
+    "social": {
+      "linkedin": "#",
+      "github": "#",
+      "twitter": "#",
+      "facebook": "#"
+    }
+  },
+  {
+    "id": 8,
+    "name": "Mehedi Hasan Akash",
+    "position": "UI/UX & Graphic Designer",
+    "bio": "Creative graphic designer with a passion for visual storytelling and brand development. Experienced in creating compelling graphics for digital and print media.",
+    "image": "https://images.unsplash.com/photo-1529665253569-6d01c0eaf7b6?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8cHJvZmlsZXxlbnwwfHwwfHx8MA%3D%3D",
+    "skills": [
+      "UI/UX Design",
+      "Graphic Design",
+      "Brand Development",
+      "Adobe Photoshop",
+      "Adobe Illustrator"
+    ],
+    "social": {
+      "linkedin": "#",
+      "twitter": "#",
+      "facebook": "#",
+      "dribbble": "#"
+    }
+  },
+  {
+    "id": 7,
+    "name": "Fariya Rahman",
+    "position": "Data Entry Specialist",
+    "bio": "Data entry specialist with expertise in data management, Excel, and Google Sheets, ensuring accurate and efficient data handling.",
+    "image": "/assets/team-profile/fariya.jpg",
+    "skills": [
+      "Data Entry",
+      "Data Management",
+      "Excel",
+      "Google Sheets",
+      "Data Research"
+    ],
+    "social": {
+      "linkedin": "#",
+      "twitter": "#",
+      "facebook": "#"
+    }
+  }
+]

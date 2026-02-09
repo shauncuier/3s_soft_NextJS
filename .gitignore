@@ -1,0 +1,53 @@
+# Node modules
+node_modules/
+
+# Build output
+.next/
+out/
+dist/
+build/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Dependency directories
+jspm_packages/
+
+# Optional npm cache directory
+.npm/
+
+# dotenv environment variables
+.env
+.env.*.local
+
+# Next.js build artifacts
+.next/
+out/
+coverage/
+.next/cache/
+
+# VSCode settings
+.vscode/
+.history/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# TypeScript cache
+*.tsbuildinfo
+
+# Misc
+*.log
+*.swp
+
+# Firebase emulators
+firebase-debug.log
+firebase-debug.*
+.firebaserc
+
+# Mac system files
+Icon?
