@@ -1,7 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { uploadImageToStorage } from "@/lib/upload";
 import { validateImageFile } from "@/lib/validation";
-import { uploadLimiter, getClientIdentifier, rateLimit } from "@/lib/rate-limit";
+import { uploadLimiter, rateLimit } from "@/lib/rate-limit";
+import { writeFile, mkdir, unlink } from "fs/promises";
+import path from "path";
+
+// Generate SEO-friendly filename
+function generateFilename(originalName: string, folder: string): string {
+    const ext = path.extname(originalName).toLowerCase() || ".jpg";
+    const nameWithoutExt = path.basename(originalName, ext)
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-|-$/g, "")
+        .substring(0, 50);
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `${nameWithoutExt}-${timestamp}-${random}${ext}`;
+}
 
 export async function POST(request: NextRequest) {
     try {
@@ -41,28 +55,37 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        console.log("Upload attempt:", {
-            fileName: file.name,
-            fileSize: file.size,
-            fileType: file.type,
-            folder,
-            storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET
-        });
+        // Generate secure filename
+        const filename = generateFilename(file.name, folder);
 
-        // Upload to Firebase Storage (compression disabled - uses browser APIs)
-        const { url, path } = await uploadImageToStorage(file, folder, false);
+        // Create upload directory path
+        const uploadDir = path.join(process.cwd(), "public", "uploads", folder);
 
-        console.log("Upload success:", { url, path });
+        // Ensure directory exists
+        await mkdir(uploadDir, { recursive: true });
+
+        // Get file buffer
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Write file to disk
+        const filePath = path.join(uploadDir, filename);
+        await writeFile(filePath, buffer);
+
+        // Generate public URL
+        const url = `/uploads/${folder}/${filename}`;
+        const storagePath = `uploads/${folder}/${filename}`;
+
+        console.log("Upload success:", { url, storagePath });
 
         return NextResponse.json({
             success: true,
             url,
-            path,
+            path: storagePath,
             message: "Image uploaded successfully",
         });
     } catch (error) {
         console.error("Upload API error:", error);
-        console.error("Error stack:", error instanceof Error ? error.stack : "No stack");
 
         return NextResponse.json(
             {
@@ -84,9 +107,9 @@ export async function DELETE(request: NextRequest) {
         }
 
         const { searchParams } = new URL(request.url);
-        const path = searchParams.get("path");
+        const imagePath = searchParams.get("path");
 
-        if (!path) {
+        if (!imagePath) {
             return NextResponse.json(
                 { error: "No path provided" },
                 { status: 400 }
@@ -94,8 +117,8 @@ export async function DELETE(request: NextRequest) {
         }
 
         // Security: Ensure path is within allowed folders
-        const allowedFolders = ["blogs/", "portfolio/", "team/", "testimonials/", "services/"];
-        const isAllowed = allowedFolders.some(folder => path.startsWith(folder));
+        const allowedFolders = ["uploads/blogs/", "uploads/portfolio/", "uploads/team/", "uploads/testimonials/", "uploads/services/"];
+        const isAllowed = allowedFolders.some(folder => imagePath.startsWith(folder));
 
         if (!isAllowed) {
             return NextResponse.json(
@@ -104,9 +127,9 @@ export async function DELETE(request: NextRequest) {
             );
         }
 
-        // Delete from Firebase Storage
-        const { deleteImageFromStorage } = await import("@/lib/upload");
-        await deleteImageFromStorage(path);
+        // Delete file from disk
+        const fullPath = path.join(process.cwd(), "public", imagePath);
+        await unlink(fullPath);
 
         return NextResponse.json({
             success: true,
