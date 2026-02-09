@@ -3,11 +3,12 @@ import { validateImageFile } from "@/lib/validation";
 import { uploadLimiter, rateLimit } from "@/lib/rate-limit";
 import { writeFile, mkdir, unlink } from "fs/promises";
 import path from "path";
+import sharp from "sharp";
 
 // Generate SEO-friendly filename
 function generateFilename(originalName: string, folder: string): string {
-    const ext = path.extname(originalName).toLowerCase() || ".jpg";
-    const nameWithoutExt = path.basename(originalName, ext)
+    const ext = ".webp"; // Always convert to WebP for best compression
+    const nameWithoutExt = path.basename(originalName, path.extname(originalName))
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
         .replace(/^-|-$/g, "")
@@ -15,6 +16,29 @@ function generateFilename(originalName: string, folder: string): string {
     const timestamp = Date.now();
     const random = Math.random().toString(36).substring(2, 8);
     return `${nameWithoutExt}-${timestamp}-${random}${ext}`;
+}
+
+// Optimize image using sharp
+async function optimizeImage(buffer: Buffer, originalType: string): Promise<Buffer> {
+    const image = sharp(buffer);
+    const metadata = await image.metadata();
+
+    // Resize if too large (max 1920px width)
+    let pipeline = image;
+    if (metadata.width && metadata.width > 1920) {
+        pipeline = pipeline.resize(1920, null, {
+            withoutEnlargement: true,
+            fit: "inside",
+        });
+    }
+
+    // Convert to WebP with good quality and compression
+    return pipeline
+        .webp({
+            quality: 80,
+            effort: 4, // Compression effort (0-6, higher = smaller file but slower)
+        })
+        .toBuffer();
 }
 
 export async function POST(request: NextRequest) {
@@ -55,7 +79,20 @@ export async function POST(request: NextRequest) {
             );
         }
 
-        // Generate secure filename
+        // Get file buffer
+        const bytes = await file.arrayBuffer();
+        const buffer = Buffer.from(bytes);
+
+        // Log original size
+        const originalSize = buffer.length;
+
+        // Optimize image
+        const optimizedBuffer = await optimizeImage(buffer, file.type);
+        const optimizedSize = optimizedBuffer.length;
+
+        console.log(`Image optimized: ${(originalSize / 1024).toFixed(1)}KB → ${(optimizedSize / 1024).toFixed(1)}KB (${((1 - optimizedSize / originalSize) * 100).toFixed(0)}% reduction)`);
+
+        // Generate optimized filename (WebP)
         const filename = generateFilename(file.name, folder);
 
         // Create upload directory path
@@ -64,25 +101,21 @@ export async function POST(request: NextRequest) {
         // Ensure directory exists
         await mkdir(uploadDir, { recursive: true });
 
-        // Get file buffer
-        const bytes = await file.arrayBuffer();
-        const buffer = Buffer.from(bytes);
-
-        // Write file to disk
+        // Write optimized file to disk
         const filePath = path.join(uploadDir, filename);
-        await writeFile(filePath, buffer);
+        await writeFile(filePath, optimizedBuffer);
 
         // Generate public URL
         const url = `/uploads/${folder}/${filename}`;
         const storagePath = `uploads/${folder}/${filename}`;
 
-        console.log("Upload success:", { url, storagePath });
-
         return NextResponse.json({
             success: true,
             url,
             path: storagePath,
-            message: "Image uploaded successfully",
+            message: "Image uploaded and optimized successfully",
+            originalSize: `${(originalSize / 1024).toFixed(1)}KB`,
+            optimizedSize: `${(optimizedSize / 1024).toFixed(1)}KB`,
         });
     } catch (error) {
         console.error("Upload API error:", error);

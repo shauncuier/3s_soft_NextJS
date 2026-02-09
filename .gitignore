@@ -51,6 +51,3 @@ firebase-debug.*
 
 # Mac system files
 Icon?
-
-# Uploaded images (stored locally)
-public/uploads/
