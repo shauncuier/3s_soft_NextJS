@@ -19,8 +19,9 @@ jspm_packages/
 # Optional npm cache directory
 .npm/
 
-# dotenv environment variables
+# dotenv environment variables (SECRETS - NEVER COMMIT!)
 .env
+.env.local
 .env.*.local
 
 # Next.js build artifacts
