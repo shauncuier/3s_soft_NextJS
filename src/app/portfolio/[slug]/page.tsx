@@ -11,13 +11,8 @@ interface PageParams {
     params: Promise<{ slug: string }>;
 }
 
-// Generate static params for all portfolio items
-export async function generateStaticParams() {
-    const data = await getPortfolio();
-    return data.map((project) => ({
-        slug: project.slug,
-    }));
-}
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
 
 // Generate metadata for each portfolio item
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {

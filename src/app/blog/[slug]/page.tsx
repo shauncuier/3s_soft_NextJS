@@ -12,13 +12,8 @@ interface PageParams {
     params: Promise<{ slug: string }>;
 }
 
-// Generate static params for all blog posts
-export async function generateStaticParams() {
-    const blogs = await getBlogs(true);
-    return blogs.map((blog) => ({
-        slug: blog.slug,
-    }));
-}
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
 
 // Generate metadata for each blog post
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {

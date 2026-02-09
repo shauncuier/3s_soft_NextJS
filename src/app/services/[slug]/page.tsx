@@ -22,13 +22,8 @@ const iconMap: Record<string, any> = {
     FaHeadphones,
 };
 
-// Generate static params for all services
-export async function generateStaticParams() {
-    const services = await getServices();
-    return services.map((service) => ({
-        slug: service.slug,
-    }));
-}
+// Force real-time data loading (no caching)
+export const dynamic = "force-dynamic";
 
 // Generate metadata for each service
 export async function generateMetadata({ params }: PageParams): Promise<Metadata> {
